@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  selector:
+    matchLabels:
+      app: db
+  serviceName: "db"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: docker.io/library/mariadb:10
+        env:
+        - name: MYSQL_DATABASE
+          value: dvwa
+        - name: MYSQL_PASSWORD
+          value: p@ssw0rd
+        - name: MYSQL_ROOT_PASSWORD
+          value: dvwa
+        - name: MYSQL_USER
+          value: dvwa
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: db
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: db
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 50Mi

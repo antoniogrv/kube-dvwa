@@ -47,7 +47,7 @@ services:
       - dvwa
     restart: unless-stopped
 ```
-</details><br />
+</details>
 
 The `ghcr.io/digininja/dvwa:latest` CRI-compatible image is built using a simple Dockerfile [[ref]](https://github.com/digininja/DVWA/blob/master/Dockerfile).
 <details>
@@ -74,7 +74,7 @@ RUN apt-get update \
 COPY --chown=www-data:www-data . .
 COPY --chown=www-data:www-data config/config.inc.php.dist config/config.inc.php
 ```
-</details><br />
+</details>
 
 ## Docker Installation
 
@@ -116,7 +116,6 @@ Applying these fixes is mandatory. The correct `compose.yml` is the following:
 	  dvwa:
 	    build: .
 	    image: ghcr.io/digininja/dvwa:latest
-	    # pull_policy: always
 	    environment:
 	      - DB_SERVER=db
 	    depends_on:
@@ -142,11 +141,16 @@ Applying these fixes is mandatory. The correct `compose.yml` is the following:
       ports: 
         - 3306:3306
   ```
-</details><br />
+</details>
 
-The Kubernetes resources can then be produced via `kompose convert -f . --with-kompose-annotation=false -v` and created on any cluster (e.g. a Minikube local cluster) using `kubectl create -f .`. Since the DVWA pod forwards connections from port 4280 to container port 80 (the Apache webserver), we can access the web application by port-forwarding a free local port on the host machine to port 80, by using the following command: `kubectl port-forward deployment/dvwa 4281:80`. 
+The Kubernetes resources can then be produced via `kompose convert -f . --with-kompose-annotation=false -v` and created on any cluster (e.g. a Minikube local cluster) using `kubectl create -f kompose`. Since the DVWA pod forwards connections from port 4280 to container port 80 (the Apache webserver), we can access the web application by port-forwarding a free local port on the host machine to port 80, by using the following command: `kubectl port-forward deployment/dvwa 4281:80`. 
 
 The application will be finally accessible on `localhost:4281`.
 
+### StatefulSets
 
+It is also possible to use a StatefulSet for MySQL and a distinct Deployment to distribute the PHP application.
 
+The StatefulSet is connected to a ClusterIP Service in order to be resolved by the DVWA pods.
+
+Execute `kubectl create -f statefulset` to generate the Kubernetes resources, and use `kubectl port-forward deployment/dvwa 4281:80` to access the application on `localhost:4281`.
