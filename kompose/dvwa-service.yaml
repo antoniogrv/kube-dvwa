@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: dvwa
+  name: dvwa
+spec:
+  ports:
+    - name: "4280"
+      port: 4280
+      targetPort: 80
+  selector:
+    io.kompose.service: dvwa
+status:
+  loadBalancer: {}
