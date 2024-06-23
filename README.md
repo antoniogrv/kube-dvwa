@@ -1,6 +1,6 @@
 # DVWA over Kubernetes
 
-> An array of Kubernetes implementations (Kompose, Operator, Chart) of DVWA.
+> An array of Kubernetes implementations (Kompose, StatefulSet, Chart) of DVWA.
 
 [DVWA](https://github.com/digininja/DVWA?tab=readme-ov-file#damn-vulnerable-web-application) is a vulnerable-by-design web application, featuring CSRF attacks, SQL injections, command injections, stored/reflected XSS attacks and more. It is usually used for educational purposes, and consists of a PHP application as well as a MySQL/MariaDB database.
 
@@ -147,10 +147,34 @@ The Kubernetes resources can then be produced via `kompose convert -f . --with-k
 
 The application will be finally accessible on `localhost:4281`.
 
+```
+git clone https://github.com/antoniogrv/kube-dvwa.git
+kubectl create -f kompose
+kubectl port-forward deployment/dvwa 4281:80
+```
+
 ### StatefulSets
 
 It is also possible to use a StatefulSet for MySQL and a distinct Deployment to distribute the PHP application.
 
 The StatefulSet is connected to a ClusterIP Service in order to be resolved by the DVWA pods.
 
+This solution is preferable to the latter as MySQL/MariaDB-backed Pods will retain the same PersistenceVolume(s) across reschedulings by the Control Plane.
+
 Execute `kubectl create -f statefulset` to generate the Kubernetes resources, and use `kubectl port-forward deployment/dvwa 4281:80` to access the application on `localhost:4281`.
+
+```
+git clone https://github.com/antoniogrv/kube-dvwa.git
+kubectl create -f statefulset
+kubectl port-forward deployment/dvwa 4281:80
+```
+
+### Helm Chart
+
+An even better solution is to wrap the StatefulSet implementation in a simple Helm chart, while also making it possible to configure most options for both the web application and the database via a straightforward `values.yaml` file. Please refer to [this repository](https://github.com/antoniogrv/kube-dvwa-helm-chart) for further instructions.
+
+```
+git clone https://github.com/antoniogrv/kube-dvwa-helm-chart.git
+helm install kube-dvwa-helm-chart
+kubectl port-forward deployment/dvwa 4281:80
+```
