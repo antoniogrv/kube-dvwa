@@ -16,15 +16,9 @@ spec:
       containers:
       - name: db
         image: docker.io/library/mariadb:10
-        env:
-        - name: MYSQL_DATABASE
-          value: dvwa
-        - name: MYSQL_PASSWORD
-          value: p@ssw0rd
-        - name: MYSQL_ROOT_PASSWORD
-          value: dvwa
-        - name: MYSQL_USER
-          value: dvwa
+        envFrom:
+        - secretRef:
+            name: db-credentials
         ports:
         - containerPort: 3306
         volumeMounts:

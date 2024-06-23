@@ -161,20 +161,24 @@ The StatefulSet is connected to a ClusterIP Service in order to be resolved by t
 
 This solution is preferable to the latter as MySQL/MariaDB-backed Pods will retain the same PersistenceVolume(s) across reschedulings by the Control Plane.
 
-Execute `kubectl create -f statefulset` to generate the Kubernetes resources, and use `kubectl port-forward deployment/dvwa 4281:80` to access the application on `localhost:4281`.
+Additionally, this implementation uses DotEnv-fueled Kubernetes Secrets to feed the database connection credentials to DVWA. An example DotEnv file resides in `/statefulset`. 
+
+Execute `kubectl create -f statefulset` to generate the Kubernetes resources; then, run `kubectl create secret generic db-credentials --from-env-file=statefulset/.env.example` to generate the database credentials Secret and use `kubectl port-forward deployment/dvwa 4281:80` to access the application on `localhost:4281`.
 
 ```
 git clone https://github.com/antoniogrv/kube-dvwa.git
 kubectl create -f statefulset
+kubectl create secret generic db-credentials --from-env-file=statefulset/.env.example
 kubectl port-forward deployment/dvwa 4281:80
 ```
 
 ### Helm Chart
 
-An even better solution is to wrap the StatefulSet implementation in a simple Helm chart, while also making it possible to configure most options for both the web application and the database via a straightforward `values.yaml` file. Please refer to [this repository](https://github.com/antoniogrv/kube-dvwa-helm-chart) for further instructions.
+An even better solution is to wrap the StatefulSet implementation in a simple Helm chart, while also making it possible to configure most options for both the web application and the database via a straightforward `values.yaml` file. Please refer to [this repository](https://github.com/antoniogrv/kube-dvwa-helm-chart) for further instructions. Since we are not using external secret management services, it is also required to produce a database credential Secret after the installation.
 
 ```
 git clone https://github.com/antoniogrv/kube-dvwa-helm-chart.git
 helm install kube-dvwa-helm-chart
+kubectl create secret generic db-credentials --from-env-file=statefulset/.env.example
 kubectl port-forward deployment/dvwa 4281:80
 ```
